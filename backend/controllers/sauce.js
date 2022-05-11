@@ -38,6 +38,11 @@ exports.modifySauce = (req, res, next) => {
     if(req.file) { // Si l'image est modifiée, on supprime l'ancienne image dans /image
         Sauce.findOne({ _id: req.params.id })
             .then(sauce => {
+                if(sauce.userId !== req.auth.userId){ // Si sauce userId est différent de auth userId
+                    res.status(401).json({ 
+                        error : new Error('Demande non autorisée')
+                    });
+                }
                 const filename = sauce.imageUrl.split('/images/')[1];
                 fs.unlink(`images/${filename}`, () => {
                     const sauceObject = 
@@ -45,6 +50,7 @@ exports.modifySauce = (req, res, next) => {
                         ...JSON.parse(req.body.sauce),
                         imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
                     }
+
                     Sauce.updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id })
                         .then(() => res.status(200).json({ message: 'Sauce modifiée avec succès !' }))
                         .catch(error => res.status(400).json({ error }))
@@ -134,4 +140,3 @@ exports.statusLikedSauce = (req, res, next) => {
         })
        .catch(error => res.status(500).json({ error }));
 };
-
