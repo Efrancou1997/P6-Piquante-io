@@ -10,3 +10,5 @@
 
 - `cd frontend`
 - npm start`
+
+PS : N'oubliez pas de créer un dossier images pour les sauces !
